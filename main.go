@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"sort"
+	"strings"
 )
 
 func main() {
@@ -23,16 +25,23 @@ func main() {
 	for scanner.Scan() {
 		token := scanner.Text()
 
-		//is_alphanumeric := regexp.MustCompile(`^[a-zA-Z]*$`).MatchString(token)
+		// Temporarily added to focus on letters only -----------------------
+		if !isLetter(token) && !isNumber(token) {
+			continue
+		} else if isNumber(token) {
+			continue
+		}
+		// ------------------------------------------------------------------
+
+		if isLetter(token) {
+			token = strings.ToLower(token)
+		}
 
 		switch []rune(token)[0] {
 		case ' ', '\t', '\n', '\f', '\r', '\v':
 			continue
 
 		default:
-			//if !is_alphanumeric {
-			//	continue
-			//}
 			if val, ok := char[token]; ok {
 				*val++
 			} else {
@@ -56,4 +65,22 @@ func main() {
 
 	}
 
+}
+
+// checks if string passed is a letter
+func isLetter(s string) bool {
+	is_letter := regexp.MustCompile(`^[a-zA-Z]*$`).MatchString(s)
+	if is_letter {
+		return true
+	}
+	return false
+}
+
+// checks if string passed is a number
+func isNumber(s string) bool {
+	is_number := regexp.MustCompile(`^[0-9]*$`).MatchString(s)
+	if is_number {
+		return true
+	}
+	return false
 }
