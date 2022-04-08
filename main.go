@@ -52,17 +52,33 @@ func main() {
 
 	}
 
-	keys := make([]string, 0, len(char))
+	letters_found := make([]string, 0, len(char))
+	letters_notFound := make([]string, 0)
 
 	for k := range char {
-		keys = append(keys, k)
+		letters_found = append(letters_found, k)
 	}
 
-	sort.Strings(keys)
+	sort.Strings(letters_found)
 
-	for _, k := range keys {
-		fmt.Println(k, *char[k])
+	// checks if there were any letters not used in the text
+	for l := 'a'; l < 'z'; l++ {
+		if _, ok := char[string(l)]; !ok {
+			letters_notFound = append(letters_notFound, string(l))
+		}
+	}
 
+	fmt.Println("These are the letters found in the text:")
+	for _, letter := range letters_found {
+		fmt.Println(letter, *char[letter])
+	}
+
+	if len(letters_notFound) != 0 {
+		fmt.Println("These are the letters not found in the text:")
+
+		for _, letter := range letters_notFound {
+			fmt.Println(letter)
+		}
 	}
 
 }
