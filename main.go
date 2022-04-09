@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"os"
 )
@@ -13,9 +15,22 @@ func main() {
 
 }
 
-func parseFile(w http.ResponseWriter, request *http.Request) {
+func parseFile(w http.ResponseWriter, r *http.Request) {
+
+	r.ParseMultipartForm(32 << 20)
+
+	f, handler, err := r.FormFile("file")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	file, err := os.Create(handler.Filename)
+
+	io.Copy(file, f)
+
 	// open the file
-	file, err := os.Open("test.txt")
+	file, err = os.Open(handler.Filename)
 	if err != nil {
 		fmt.Println(err)
 	}
