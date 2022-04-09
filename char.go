@@ -11,7 +11,7 @@ import (
 )
 
 // scans the file and puts unique values into a map while recording the number of times a repeated value appears
-func scanFile(f *os.File) map[string]*int {
+func scanFileChar(f *os.File) map[string]*int {
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanRunes)
 
