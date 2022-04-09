@@ -13,12 +13,23 @@ import (
 
 func main() {
 
+	var fileName string
+
+	fmt.Print("Enter the file containing the text you want analyzed: ")
+	fmt.Scanf("%s", &fileName)
+
+	sendRequest(fileName)
+
+}
+
+func sendRequest(s string) {
+
 	client := &http.Client{}
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	fw, err := writer.CreateFormFile("file", "test.txt")
+	fw, err := writer.CreateFormFile("file", s)
 	if err != nil {
 		log.Fatal(err)
 	}
