@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -13,12 +14,23 @@ import (
 
 func main() {
 
-	var fileName string
-
+	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("Enter the file containing the text you want analyzed: ")
-	fmt.Scanf("%s", &fileName)
 
-	sendRequest(fileName)
+	for scanner.Scan() {
+
+		fileName := scanner.Text()
+
+		_, err := os.Stat(fileName)
+		if err != nil {
+			fmt.Println("Please enter a valid file containing the text you want analyzed: ")
+
+			continue
+		}
+
+		sendRequest(fileName)
+		fmt.Print("Enter the file containing the text you want analyzed: ")
+	}
 
 }
 
