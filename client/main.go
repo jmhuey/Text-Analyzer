@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -45,6 +46,7 @@ func main() {
 
 		wg.Wait()
 
+		fmt.Println()
 		fmt.Print("Enter the file or files containing the text you want analyzed: ")
 	}
 
@@ -90,50 +92,79 @@ func sendRequest(s string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(string(content))
-	fmt.Println()
+	parseJson(content, s)
+
 }
 
 //-----------------
 // Print Functions
 //-----------------
-func printLettersFound(lf []string, m map[string]*int) {
-	fmt.Println()
-	fmt.Println("These are the letters found in the text:")
 
-	for _, letter := range lf {
-		fmt.Println(letter, ": ", *m[letter])
-	}
+func parseJson(c []byte, s string) {
+
+	fmt.Println("Here is the data about the file:", s)
+
+	fileData := make(map[string]map[string]int)
+
+	json.Unmarshal(c, &fileData)
+
+	printLettersFound(fileData)
+	printLettersNotFound(fileData)
+	printNumbersFound(fileData)
+	printNumbersNotFound(fileData)
+
+	fmt.Println("------------------------------------------------------")
+	fmt.Println()
+
 }
 
-func printLettersNotFound(lnf []string) {
-	if len(lnf) != 0 {
-		fmt.Println()
-		fmt.Println("These are the letters not found in the text:")
+func printLettersFound(fd map[string]map[string]int) {
+	fmt.Println()
+	fmt.Println("These are the letters found in the text: ")
 
-		for _, letter := range lnf {
-			fmt.Println(letter)
+	for l := 'a'; l <= 'z'; l++ {
+		if _, ok := fd["Letters"][string(l)]; ok {
+			fmt.Printf("%c: %d | ", l, fd["Letters"][string(l)])
 		}
 	}
+	fmt.Println()
 }
 
-func printNumbersFound(nf []int, m map[string]*int) {
+func printLettersNotFound(fd map[string]map[string]int) {
+	if len(fd["LettersNotFound"]) != 0 {
+		fmt.Println()
+		fmt.Println("These are the letters not found in the text: ")
+		for l := 'a'; l <= 'z'; l++ {
+			if _, ok := fd["LettersNotFound"][string(l)]; ok {
+				fmt.Printf("%c: %d | ", l, fd["Letters"][string(l)])
+			}
+		}
+		fmt.Println()
+	}
+}
+
+func printNumbersFound(fd map[string]map[string]int) {
 	fmt.Println()
 	fmt.Println("These are the numbers found in the text:")
 
-	for _, num := range nf {
-		fmt.Println(num, ": ", *m[strconv.Itoa(num)])
+	for n := 0; n < 10; n++ {
+		if _, ok := fd["Numbers"][strconv.Itoa(n)]; ok {
+			fmt.Printf("%d: %d | ", n, fd["Numbers"][strconv.Itoa(n)])
+		}
 	}
+	fmt.Println()
 }
 
-func printNumbersNotFound(nnf []int) {
-	if len(nnf) != 0 {
+func printNumbersNotFound(fd map[string]map[string]int) {
+	if len(fd["NumbersNotFound"]) != 0 {
 		fmt.Println()
-		fmt.Println("These are the numbers not found in the text:")
-
-		for _, num := range nnf {
-			fmt.Println(num)
+		fmt.Println("These are the numbers not found in the text: ")
+		for n := 0; n < 10; n++ {
+			if _, ok := fd["NumbersNotFound"][strconv.Itoa(n)]; ok {
+				fmt.Printf("%d: %d | ", n, fd["NumbersNotFound"][strconv.Itoa(n)])
+			}
 		}
+		fmt.Println()
 	}
 
 }
