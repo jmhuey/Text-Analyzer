@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -19,17 +20,19 @@ func main() {
 
 	for scanner.Scan() {
 
-		fileName := scanner.Text()
+		input := scanner.Text()
 
-		_, err := os.Stat(fileName)
-		if err != nil {
-			fmt.Println("Please enter a valid file containing the text you want analyzed: ")
+		for _, fileName := range strings.Fields(input) {
+			_, err := os.Stat(fileName)
+			if err != nil {
+				fmt.Println(fileName, "is not a valid file")
 
-			continue
+				continue
+			}
+			sendRequest(fileName)
 		}
 
-		sendRequest(fileName)
-		fmt.Print("Enter the file containing the text you want analyzed: ")
+		fmt.Print("Enter the file or files containing the text you want analyzed: ")
 	}
 
 }
@@ -46,7 +49,7 @@ func sendRequest(s string) {
 		log.Fatal(err)
 	}
 
-	file, err := os.Open("test.txt")
+	file, err := os.Open(s)
 	if err != nil {
 		log.Fatal(err)
 	}
