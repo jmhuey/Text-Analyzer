@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -39,29 +40,38 @@ func parseFile(w http.ResponseWriter, r *http.Request) {
 	// Character operation calls
 	//---------------------------
 
-	char := scanFileChar(file)
+	charFound := scanFileChar(file)
 
-	letters_found, num_found := sortCharacters(char)
-	letters_notFound, num_notFound := make([]string, 0), make([]int, 0)
+	resp, err := json.Marshal(charFound)
+	if err != nil {
+		fmt.Print("bleh")
+	}
 
-	// checks if there were any letters not found in the text
-	checkMissingLetters(&letters_notFound, char)
+	w.Write(resp)
+	/*
 
-	// checks if there were any numbers not found in text
-	checkMissingNumbers(&num_notFound, char)
+		letters_found, num_found := sortCharacters(char)
+		letters_notFound, num_notFound := make([]string, 0), make([]int, 0)
 
-	// prints out letters found
-	printLettersFound(letters_found, char)
+		// checks if there were any letters not found in the text
+		checkMissingLetters(&letters_notFound, char)
 
-	// prints out letters not found if any
+		// checks if there were any numbers not found in text
+		checkMissingNumbers(&num_notFound, char)
 
-	printLettersNotFound(letters_notFound)
+		// prints out letters found
+		printLettersFound(letters_found, char)
 
-	// prints the numbers found
-	printNumbersFound(num_found, char)
+		// prints out letters not found if any
 
-	// prints out numbers not found if any
-	printNumbersNotFound(num_notFound)
+		printLettersNotFound(letters_notFound)
+
+		// prints the numbers found
+		printNumbersFound(num_found, char)
+
+		// prints out numbers not found if any
+		printNumbersNotFound(num_notFound)
+	*/
 
 	//----------------------
 	// Word operation calls

@@ -77,5 +77,5 @@ func sendRequest(s string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(content)
+	fmt.Println(string(content))
 }

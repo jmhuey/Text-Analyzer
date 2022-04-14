@@ -5,50 +5,61 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 )
 
 // scans the file and puts unique values into a map while recording the number of times a repeated value appears
-func scanFileChar(f *os.File) map[string]*int {
+func scanFileChar(f *os.File) map[string]map[string]*int {
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanRunes)
 
-	char := make(map[string]*int)
+	//char := make(map[string]*int)
+	charFound := make(map[string]map[string]*int)
+	charFound["Letters"] = map[string]*int{}
+	charFound["Numbers"] = map[string]*int{}
+	charFound["LettersNotFound"] = map[string]*int{}
+	charFound["NumbersNotFound"] = map[string]*int{}
 
 	for scanner.Scan() {
 		token := scanner.Text()
 
-		// Temporarily added to focus on letters only -----------------------
-		if !isLetter(token) && !isNumber(token) {
-			continue
-		}
-		// ------------------------------------------------------------------
-
+		/*
+			// Temporarily added to focus on letters only -----------------------
+			if !isLetter(token) && !isNumber(token) {
+				continue
+			}
+			// ------------------------------------------------------------------
+		*/
 		if isLetter(token) {
 			token = strings.ToLower(token)
-		}
-
-		// ignores the whitespace | if the token is in the map add 1 to the value otherwise add the token to map
-		switch []rune(token)[0] {
-		case ' ', '\t', '\n', '\f', '\r', '\v':
-			continue
-
-		default:
-			if val, ok := char[token]; ok {
+			if val, ok := charFound["Letters"][token]; ok {
 				*val++
 			} else {
 				t := 1
-				char[token] = &t
+				charFound["Letters"][token] = &t
 			}
+		} else if isNumber(token) {
+			if val, ok := charFound["Numbers"][token]; ok {
+				*val++
+
+			} else {
+				t := 1
+				charFound["Numbers"][token] = &t
+			}
+		} else {
+			continue
 		}
 
 	}
 
-	return char
+	checkMissingLetters(charFound)
+	checkMissingNumbers(charFound)
+
+	return charFound
 }
 
+/*
 // Sorts the characters into a slice of letters and numbers before further sorting alphanumerically
 func sortCharacters(m map[string]*int) ([]string, []int) {
 
@@ -75,6 +86,7 @@ func sortCharacters(m map[string]*int) ([]string, []int) {
 
 	return letters_found, num_found
 }
+*/
 
 // checks if string passed is a letter
 func isLetter(s string) bool {
@@ -94,18 +106,20 @@ func isNumber(s string) bool {
 	return false
 }
 
-func checkMissingLetters(ml *[]string, m map[string]*int) {
+func checkMissingLetters(cf map[string]map[string]*int) {
 	for l := 'a'; l < 'z'; l++ {
-		if _, ok := m[string(l)]; !ok {
-			*ml = append(*ml, string(l))
+		if _, ok := cf["Letters"][string(l)]; !ok {
+			t := 0
+			cf["LettersNotFound"][string(l)] = &t
 		}
 	}
 }
 
-func checkMissingNumbers(mn *[]int, m map[string]*int) {
+func checkMissingNumbers(cf map[string]map[string]*int) {
 	for n := 0; n < 10; n++ {
-		if _, ok := m[strconv.Itoa(n)]; !ok {
-			*mn = append(*mn, n)
+		if _, ok := cf["Numbers"][strconv.Itoa(n)]; !ok {
+			t := 0
+			cf["NumbersNotFound"][strconv.Itoa(n)] = &t
 		}
 	}
 }
