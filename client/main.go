@@ -10,13 +10,17 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"sync"
 )
 
 func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("Enter the file containing the text you want analyzed: ")
+
+	var wg sync.WaitGroup
 
 	for scanner.Scan() {
 
@@ -29,8 +33,17 @@ func main() {
 
 				continue
 			}
-			sendRequest(fileName)
+
+			wg.Add(1)
+
+			go func(f string) {
+				defer wg.Done()
+				sendRequest(f)
+			}(fileName)
+
 		}
+
+		wg.Wait()
 
 		fmt.Print("Enter the file or files containing the text you want analyzed: ")
 	}
@@ -78,4 +91,49 @@ func sendRequest(s string) {
 	}
 
 	fmt.Println(string(content))
+	fmt.Println()
+}
+
+//-----------------
+// Print Functions
+//-----------------
+func printLettersFound(lf []string, m map[string]*int) {
+	fmt.Println()
+	fmt.Println("These are the letters found in the text:")
+
+	for _, letter := range lf {
+		fmt.Println(letter, ": ", *m[letter])
+	}
+}
+
+func printLettersNotFound(lnf []string) {
+	if len(lnf) != 0 {
+		fmt.Println()
+		fmt.Println("These are the letters not found in the text:")
+
+		for _, letter := range lnf {
+			fmt.Println(letter)
+		}
+	}
+}
+
+func printNumbersFound(nf []int, m map[string]*int) {
+	fmt.Println()
+	fmt.Println("These are the numbers found in the text:")
+
+	for _, num := range nf {
+		fmt.Println(num, ": ", *m[strconv.Itoa(num)])
+	}
+}
+
+func printNumbersNotFound(nnf []int) {
+	if len(nnf) != 0 {
+		fmt.Println()
+		fmt.Println("These are the numbers not found in the text:")
+
+		for _, num := range nnf {
+			fmt.Println(num)
+		}
+	}
+
 }
