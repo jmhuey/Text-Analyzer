@@ -48,34 +48,6 @@ func parseFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(resp)
-	/*
-
-		letters_found, num_found := sortCharacters(char)
-		letters_notFound, num_notFound := make([]string, 0), make([]int, 0)
-
-		// checks if there were any letters not found in the text
-		checkMissingLetters(&letters_notFound, char)
-
-		// checks if there were any numbers not found in text
-		checkMissingNumbers(&num_notFound, char)
-
-		// prints out letters found
-		printLettersFound(letters_found, char)
-
-		// prints out letters not found if any
-
-		printLettersNotFound(letters_notFound)
-
-		// prints the numbers found
-		printNumbersFound(num_found, char)
-
-		// prints out numbers not found if any
-		printNumbersNotFound(num_notFound)
-	*/
-
-	//----------------------
-	// Word operation calls
-	//----------------------
 
 	word := scanFileWord(file)
 

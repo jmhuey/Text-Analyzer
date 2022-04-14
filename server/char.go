@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -24,13 +23,6 @@ func scanFileChar(f *os.File) map[string]map[string]*int {
 	for scanner.Scan() {
 		token := scanner.Text()
 
-		/*
-			// Temporarily added to focus on letters only -----------------------
-			if !isLetter(token) && !isNumber(token) {
-				continue
-			}
-			// ------------------------------------------------------------------
-		*/
 		if isLetter(token) {
 			token = strings.ToLower(token)
 			if val, ok := charFound["Letters"][token]; ok {
@@ -58,35 +50,6 @@ func scanFileChar(f *os.File) map[string]map[string]*int {
 
 	return charFound
 }
-
-/*
-// Sorts the characters into a slice of letters and numbers before further sorting alphanumerically
-func sortCharacters(m map[string]*int) ([]string, []int) {
-
-	letters_found := make([]string, 0)
-	num_found := make([]int, 0)
-
-	// sorting the characters found
-	for k := range m {
-		if isLetter(k) {
-			letters_found = append(letters_found, k)
-		} else if isNumber(k) {
-
-			knum, err := strconv.Atoi(k)
-			if err != nil {
-				fmt.Print("Error: Unable to convert string num to int")
-			}
-
-			num_found = append(num_found, knum)
-		}
-	}
-
-	sort.Strings(letters_found)
-	sort.Ints(num_found)
-
-	return letters_found, num_found
-}
-*/
 
 // checks if string passed is a letter
 func isLetter(s string) bool {
@@ -122,48 +85,4 @@ func checkMissingNumbers(cf map[string]map[string]*int) {
 			cf["NumbersNotFound"][strconv.Itoa(n)] = &t
 		}
 	}
-}
-
-//-----------------
-// Print Functions
-//-----------------
-func printLettersFound(lf []string, m map[string]*int) {
-	fmt.Println()
-	fmt.Println("These are the letters found in the text:")
-
-	for _, letter := range lf {
-		fmt.Println(letter, ": ", *m[letter])
-	}
-}
-
-func printLettersNotFound(lnf []string) {
-	if len(lnf) != 0 {
-		fmt.Println()
-		fmt.Println("These are the letters not found in the text:")
-
-		for _, letter := range lnf {
-			fmt.Println(letter)
-		}
-	}
-}
-
-func printNumbersFound(nf []int, m map[string]*int) {
-	fmt.Println()
-	fmt.Println("These are the numbers found in the text:")
-
-	for _, num := range nf {
-		fmt.Println(num, ": ", *m[strconv.Itoa(num)])
-	}
-}
-
-func printNumbersNotFound(nnf []int) {
-	if len(nnf) != 0 {
-		fmt.Println()
-		fmt.Println("These are the numbers not found in the text:")
-
-		for _, num := range nnf {
-			fmt.Println(num)
-		}
-	}
-
 }
