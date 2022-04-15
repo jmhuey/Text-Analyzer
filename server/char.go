@@ -8,36 +8,47 @@ import (
 	"strings"
 )
 
+type CharsFound struct {
+	Filename        string
+	Letters         map[string]*int
+	Numbers         map[string]*int
+	LettersNotFound map[string]*int
+	NumbersNotFound map[string]*int
+}
+
 // scans the file and puts unique values into a map while recording the number of times a repeated value appears
-func scanFileChar(f *os.File) map[string]map[string]*int {
+func scanFileChar(f *os.File, s string) *CharsFound {
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanRunes)
 
 	//char := make(map[string]*int)
-	charFound := make(map[string]map[string]*int)
-	charFound["Letters"] = map[string]*int{}
-	charFound["Numbers"] = map[string]*int{}
-	charFound["LettersNotFound"] = map[string]*int{}
-	charFound["NumbersNotFound"] = map[string]*int{}
+
+	charsFound := new(CharsFound)
+	charsFound.Filename = s
+
+	charsFound.Letters = make(map[string]*int)
+	charsFound.Numbers = make(map[string]*int)
+	charsFound.LettersNotFound = make(map[string]*int)
+	charsFound.NumbersNotFound = make(map[string]*int)
 
 	for scanner.Scan() {
 		token := scanner.Text()
 
 		if isLetter(token) {
 			token = strings.ToLower(token)
-			if val, ok := charFound["Letters"][token]; ok {
+			if val, ok := charsFound.Letters[token]; ok {
 				*val++
 			} else {
 				t := 1
-				charFound["Letters"][token] = &t
+				charsFound.Letters[token] = &t
 			}
 		} else if isNumber(token) {
-			if val, ok := charFound["Numbers"][token]; ok {
+			if val, ok := charsFound.Numbers[token]; ok {
 				*val++
 
 			} else {
 				t := 1
-				charFound["Numbers"][token] = &t
+				charsFound.Numbers[token] = &t
 			}
 		} else {
 			continue
@@ -45,10 +56,10 @@ func scanFileChar(f *os.File) map[string]map[string]*int {
 
 	}
 
-	checkMissingLetters(charFound)
-	checkMissingNumbers(charFound)
+	checkMissingLetters(charsFound)
+	checkMissingNumbers(charsFound)
 
-	return charFound
+	return charsFound
 }
 
 // checks if string passed is a letter
@@ -69,20 +80,20 @@ func isNumber(s string) bool {
 	return false
 }
 
-func checkMissingLetters(cf map[string]map[string]*int) {
+func checkMissingLetters(cf *CharsFound) {
 	for l := 'a'; l < 'z'; l++ {
-		if _, ok := cf["Letters"][string(l)]; !ok {
+		if _, ok := cf.Letters[string(l)]; !ok {
 			t := 0
-			cf["LettersNotFound"][string(l)] = &t
+			cf.LettersNotFound[string(l)] = &t
 		}
 	}
 }
 
-func checkMissingNumbers(cf map[string]map[string]*int) {
+func checkMissingNumbers(cf *CharsFound) {
 	for n := 0; n < 10; n++ {
-		if _, ok := cf["Numbers"][strconv.Itoa(n)]; !ok {
+		if _, ok := cf.Numbers[strconv.Itoa(n)]; !ok {
 			t := 0
-			cf["NumbersNotFound"][strconv.Itoa(n)] = &t
+			cf.NumbersNotFound[strconv.Itoa(n)] = &t
 		}
 	}
 }

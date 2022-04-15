@@ -16,6 +16,14 @@ import (
 	"sync"
 )
 
+type CharsFound struct {
+	Filename        string
+	Letters         map[string]*int
+	Numbers         map[string]*int
+	LettersNotFound map[string]*int
+	NumbersNotFound map[string]*int
+}
+
 func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -92,21 +100,26 @@ func sendRequest(s string) {
 		log.Fatal(err)
 	}
 
-	parseJson(content, s)
+	//fmt.Print(content)
 
+	parseJson(content)
+
+	//fmt.Print(content)
 }
 
 //-----------------
 // Print Functions
 //-----------------
 
-func parseJson(c []byte, s string) {
+func parseJson(c []byte) {
 
-	fmt.Println("Here is the data about the file:", s)
+	//fileData := make(map[string]map[string]int)
 
-	fileData := make(map[string]map[string]int)
+	fileData := new(CharsFound)
 
 	json.Unmarshal(c, &fileData)
+
+	fmt.Println("Here is the data about the file:", fileData.Filename)
 
 	printLettersFound(fileData)
 	printLettersNotFound(fileData)
@@ -118,50 +131,50 @@ func parseJson(c []byte, s string) {
 
 }
 
-func printLettersFound(fd map[string]map[string]int) {
+func printLettersFound(fd *CharsFound) {
 	fmt.Println()
 	fmt.Println("These are the letters found in the text: ")
 
 	for l := 'a'; l <= 'z'; l++ {
-		if _, ok := fd["Letters"][string(l)]; ok {
-			fmt.Printf("%c: %d | ", l, fd["Letters"][string(l)])
+		if _, ok := fd.Letters[string(l)]; ok {
+			fmt.Printf("%c: %d | ", l, *fd.Letters[string(l)])
 		}
 	}
 	fmt.Println()
 }
 
-func printLettersNotFound(fd map[string]map[string]int) {
-	if len(fd["LettersNotFound"]) != 0 {
+func printLettersNotFound(fd *CharsFound) {
+	if len(fd.LettersNotFound) != 0 {
 		fmt.Println()
 		fmt.Println("These are the letters not found in the text: ")
 		for l := 'a'; l <= 'z'; l++ {
-			if _, ok := fd["LettersNotFound"][string(l)]; ok {
-				fmt.Printf("%c: %d | ", l, fd["Letters"][string(l)])
+			if _, ok := fd.LettersNotFound[string(l)]; ok {
+				fmt.Printf("%c: %d | ", l, *fd.LettersNotFound[string(l)])
 			}
 		}
 		fmt.Println()
 	}
 }
 
-func printNumbersFound(fd map[string]map[string]int) {
+func printNumbersFound(fd *CharsFound) {
 	fmt.Println()
 	fmt.Println("These are the numbers found in the text:")
 
 	for n := 0; n < 10; n++ {
-		if _, ok := fd["Numbers"][strconv.Itoa(n)]; ok {
-			fmt.Printf("%d: %d | ", n, fd["Numbers"][strconv.Itoa(n)])
+		if _, ok := fd.Numbers[strconv.Itoa(n)]; ok {
+			fmt.Printf("%d: %d | ", n, *fd.Numbers[strconv.Itoa(n)])
 		}
 	}
 	fmt.Println()
 }
 
-func printNumbersNotFound(fd map[string]map[string]int) {
-	if len(fd["NumbersNotFound"]) != 0 {
+func printNumbersNotFound(fd *CharsFound) {
+	if len(fd.NumbersNotFound) != 0 {
 		fmt.Println()
 		fmt.Println("These are the numbers not found in the text: ")
 		for n := 0; n < 10; n++ {
-			if _, ok := fd["NumbersNotFound"][strconv.Itoa(n)]; ok {
-				fmt.Printf("%d: %d | ", n, fd["NumbersNotFound"][strconv.Itoa(n)])
+			if _, ok := fd.NumbersNotFound[strconv.Itoa(n)]; ok {
+				fmt.Printf("%d: %d | ", n, *fd.NumbersNotFound[strconv.Itoa(n)])
 			}
 		}
 		fmt.Println()

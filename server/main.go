@@ -40,11 +40,11 @@ func parseFile(w http.ResponseWriter, r *http.Request) {
 	// Character operation calls
 	//---------------------------
 
-	charFound := scanFileChar(file)
+	data := scanFileChar(file, handler.Filename)
 
-	resp, err := json.Marshal(charFound)
+	resp, err := json.Marshal(data)
 	if err != nil {
-		fmt.Print("bleh")
+		fmt.Print("Unable to marshal information provided")
 	}
 
 	w.Write(resp)
