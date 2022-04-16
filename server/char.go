@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 
 // Holds the all the info found on the text related to characters
 type CharInfo struct {
-	Filename        string
+	TotalChar       int
 	Letters         map[string]*int
 	Numbers         map[string]*int
 	LettersNotFound map[string]*int
@@ -18,13 +19,12 @@ type CharInfo struct {
 }
 
 // scans the file and puts unique values into a map while recording the number of times a repeated value appears
-func scanFileChars(f *os.File, s string) *CharInfo {
+func scanFileChars(s string) *CharInfo {
 
 	//-------------------------------------
 	// Set up the struct to hold file data
 	//------------------------------------
 	charInfo := new(CharInfo)
-	charInfo.Filename = s
 
 	charInfo.Letters = make(map[string]*int)
 	charInfo.Numbers = make(map[string]*int)
@@ -34,7 +34,13 @@ func scanFileChars(f *os.File, s string) *CharInfo {
 	//------------------------------------------
 	// Process text and save values into struct
 	//------------------------------------------
-	scanner := bufio.NewScanner(f)
+
+	file, err := os.Open(s)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
 
 	for scanner.Scan() {
@@ -48,6 +54,7 @@ func scanFileChars(f *os.File, s string) *CharInfo {
 				t := 1
 				charInfo.Letters[token] = &t
 			}
+			charInfo.TotalChar++
 		} else if isNumber(token) {
 			if val, ok := charInfo.Numbers[token]; ok {
 				*val++
@@ -56,6 +63,7 @@ func scanFileChars(f *os.File, s string) *CharInfo {
 				t := 1
 				charInfo.Numbers[token] = &t
 			}
+			charInfo.TotalChar++
 		} else {
 			continue
 		}

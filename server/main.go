@@ -10,7 +10,9 @@ import (
 )
 
 type TextAnalysis struct {
+	Filename string
 	CharInfo CharInfo
+	WordInfo WordInfo
 }
 
 func main() {
@@ -37,28 +39,19 @@ func parseFile(w http.ResponseWriter, r *http.Request) {
 
 	io.Copy(file, f)
 
-	// open the file
-	file, err = os.Open(handler.Filename)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	//---------------------
 	// Text analysis calls
 	//---------------------
-	data := scanFileChars(file, handler.Filename)
-
-	word := scanFileWord(file)
-
-	for key, value := range word {
-		fmt.Println(key, ":", value)
-	}
+	charData := scanFileChars(handler.Filename)
+	wordData := scanFileWord(handler.Filename)
 
 	//-----------------------------------------
 	// Create and send response back to client
 	//-----------------------------------------
 	textAnalysis := new(TextAnalysis)
-	textAnalysis.CharInfo = *data
+	textAnalysis.Filename = handler.Filename
+	textAnalysis.CharInfo = *charData
+	textAnalysis.WordInfo = *wordData
 
 	resp, err := json.Marshal(textAnalysis)
 	if err != nil {
