@@ -2,50 +2,59 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
+// Holds the all the info found on the text related to characters
+type CharsFound struct {
+	Filename        string
+	Letters         map[string]*int
+	Numbers         map[string]*int
+	LettersNotFound map[string]*int
+	NumbersNotFound map[string]*int
+}
+
 // scans the file and puts unique values into a map while recording the number of times a repeated value appears
-func scanFileChar(f *os.File) map[string]map[string]*int {
+func scanFileChar(f *os.File, s string) *CharsFound {
+
+	//-------------------------------------
+	// Set up the struct to hold file data
+	//------------------------------------
+	charsFound := new(CharsFound)
+	charsFound.Filename = s
+
+	charsFound.Letters = make(map[string]*int)
+	charsFound.Numbers = make(map[string]*int)
+	charsFound.LettersNotFound = make(map[string]*int)
+	charsFound.NumbersNotFound = make(map[string]*int)
+
+	//------------------------------------------
+	// Process text and save values into struct
+	//------------------------------------------
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanRunes)
-
-	//char := make(map[string]*int)
-	charFound := make(map[string]map[string]*int)
-	charFound["Letters"] = map[string]*int{}
-	charFound["Numbers"] = map[string]*int{}
-	charFound["LettersNotFound"] = map[string]*int{}
-	charFound["NumbersNotFound"] = map[string]*int{}
 
 	for scanner.Scan() {
 		token := scanner.Text()
 
-		/*
-			// Temporarily added to focus on letters only -----------------------
-			if !isLetter(token) && !isNumber(token) {
-				continue
-			}
-			// ------------------------------------------------------------------
-		*/
 		if isLetter(token) {
 			token = strings.ToLower(token)
-			if val, ok := charFound["Letters"][token]; ok {
+			if val, ok := charsFound.Letters[token]; ok {
 				*val++
 			} else {
 				t := 1
-				charFound["Letters"][token] = &t
+				charsFound.Letters[token] = &t
 			}
 		} else if isNumber(token) {
-			if val, ok := charFound["Numbers"][token]; ok {
+			if val, ok := charsFound.Numbers[token]; ok {
 				*val++
 
 			} else {
 				t := 1
-				charFound["Numbers"][token] = &t
+				charsFound.Numbers[token] = &t
 			}
 		} else {
 			continue
@@ -53,40 +62,12 @@ func scanFileChar(f *os.File) map[string]map[string]*int {
 
 	}
 
-	checkMissingLetters(charFound)
-	checkMissingNumbers(charFound)
+	checkMissingLetters(charsFound)
+	checkMissingNumbers(charsFound)
 
-	return charFound
+	// Return the struct containing info found
+	return charsFound
 }
-
-/*
-// Sorts the characters into a slice of letters and numbers before further sorting alphanumerically
-func sortCharacters(m map[string]*int) ([]string, []int) {
-
-	letters_found := make([]string, 0)
-	num_found := make([]int, 0)
-
-	// sorting the characters found
-	for k := range m {
-		if isLetter(k) {
-			letters_found = append(letters_found, k)
-		} else if isNumber(k) {
-
-			knum, err := strconv.Atoi(k)
-			if err != nil {
-				fmt.Print("Error: Unable to convert string num to int")
-			}
-
-			num_found = append(num_found, knum)
-		}
-	}
-
-	sort.Strings(letters_found)
-	sort.Ints(num_found)
-
-	return letters_found, num_found
-}
-*/
 
 // checks if string passed is a letter
 func isLetter(s string) bool {
@@ -106,64 +87,22 @@ func isNumber(s string) bool {
 	return false
 }
 
-func checkMissingLetters(cf map[string]map[string]*int) {
+// checks if the text had any letters not used
+func checkMissingLetters(cf *CharsFound) {
 	for l := 'a'; l < 'z'; l++ {
-		if _, ok := cf["Letters"][string(l)]; !ok {
+		if _, ok := cf.Letters[string(l)]; !ok {
 			t := 0
-			cf["LettersNotFound"][string(l)] = &t
+			cf.LettersNotFound[string(l)] = &t
 		}
 	}
 }
 
-func checkMissingNumbers(cf map[string]map[string]*int) {
+// checks if the text had any numbers not used
+func checkMissingNumbers(cf *CharsFound) {
 	for n := 0; n < 10; n++ {
-		if _, ok := cf["Numbers"][strconv.Itoa(n)]; !ok {
+		if _, ok := cf.Numbers[strconv.Itoa(n)]; !ok {
 			t := 0
-			cf["NumbersNotFound"][strconv.Itoa(n)] = &t
+			cf.NumbersNotFound[strconv.Itoa(n)] = &t
 		}
 	}
-}
-
-//-----------------
-// Print Functions
-//-----------------
-func printLettersFound(lf []string, m map[string]*int) {
-	fmt.Println()
-	fmt.Println("These are the letters found in the text:")
-
-	for _, letter := range lf {
-		fmt.Println(letter, ": ", *m[letter])
-	}
-}
-
-func printLettersNotFound(lnf []string) {
-	if len(lnf) != 0 {
-		fmt.Println()
-		fmt.Println("These are the letters not found in the text:")
-
-		for _, letter := range lnf {
-			fmt.Println(letter)
-		}
-	}
-}
-
-func printNumbersFound(nf []int, m map[string]*int) {
-	fmt.Println()
-	fmt.Println("These are the numbers found in the text:")
-
-	for _, num := range nf {
-		fmt.Println(num, ": ", *m[strconv.Itoa(num)])
-	}
-}
-
-func printNumbersNotFound(nnf []int) {
-	if len(nnf) != 0 {
-		fmt.Println()
-		fmt.Println("These are the numbers not found in the text:")
-
-		for _, num := range nnf {
-			fmt.Println(num)
-		}
-	}
-
 }
