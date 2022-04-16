@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Holds the all the info found on the text related to characters
 type CharsFound struct {
 	Filename        string
 	Letters         map[string]*int
@@ -18,11 +19,10 @@ type CharsFound struct {
 
 // scans the file and puts unique values into a map while recording the number of times a repeated value appears
 func scanFileChar(f *os.File, s string) *CharsFound {
-	scanner := bufio.NewScanner(f)
-	scanner.Split(bufio.ScanRunes)
 
-	//char := make(map[string]*int)
-
+	//-------------------------------------
+	// Set up the struct to hold file data
+	//------------------------------------
 	charsFound := new(CharsFound)
 	charsFound.Filename = s
 
@@ -30,6 +30,12 @@ func scanFileChar(f *os.File, s string) *CharsFound {
 	charsFound.Numbers = make(map[string]*int)
 	charsFound.LettersNotFound = make(map[string]*int)
 	charsFound.NumbersNotFound = make(map[string]*int)
+
+	//------------------------------------------
+	// Process text and save values into struct
+	//------------------------------------------
+	scanner := bufio.NewScanner(f)
+	scanner.Split(bufio.ScanRunes)
 
 	for scanner.Scan() {
 		token := scanner.Text()
@@ -59,6 +65,7 @@ func scanFileChar(f *os.File, s string) *CharsFound {
 	checkMissingLetters(charsFound)
 	checkMissingNumbers(charsFound)
 
+	// Return the struct containing info found
 	return charsFound
 }
 
@@ -80,6 +87,7 @@ func isNumber(s string) bool {
 	return false
 }
 
+// checks if the text had any letters not used
 func checkMissingLetters(cf *CharsFound) {
 	for l := 'a'; l < 'z'; l++ {
 		if _, ok := cf.Letters[string(l)]; !ok {
@@ -89,6 +97,7 @@ func checkMissingLetters(cf *CharsFound) {
 	}
 }
 
+// checks if the text had any numbers not used
 func checkMissingNumbers(cf *CharsFound) {
 	for n := 0; n < 10; n++ {
 		if _, ok := cf.Numbers[strconv.Itoa(n)]; !ok {

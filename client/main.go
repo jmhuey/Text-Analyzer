@@ -16,6 +16,7 @@ import (
 	"sync"
 )
 
+// Holds information returned by the server
 type CharsFound struct {
 	Filename        string
 	Letters         map[string]*int
@@ -26,20 +27,27 @@ type CharsFound struct {
 
 func main() {
 
+	// Read in user input
 	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Print("Enter the file containing the text you want analyzed: ")
+	fmt.Print("Enter the file or files containing the text you want analyzed or enter exit to exit the program: ")
 
 	var wg sync.WaitGroup
 
+	// Reads in user input until EXIT is passed
 	for scanner.Scan() {
 
 		input := scanner.Text()
 
+		if input == "exit" {
+			os.Exit(0)
+		}
+
+		// Check all user input to see if the files exist in current directory before calling the sendRequest function in a goroutine
 		for _, fileName := range strings.Fields(input) {
+
 			_, err := os.Stat(fileName)
 			if err != nil {
-				fmt.Println(fileName, "is not a valid file")
-
+				log.Println(fileName, "was not found in current directory")
 				continue
 			}
 
@@ -52,73 +60,83 @@ func main() {
 
 		}
 
+		// Waits for all files to finish being analyzed before asking the user for input
 		wg.Wait()
 
-		fmt.Println()
-		fmt.Print("Enter the file or files containing the text you want analyzed: ")
+		fmt.Print("\nEnter the file or files containing the text you want analyzed or enter exit to exit the program: ")
 	}
 
 }
 
+// Sends a POST request to the local server containing the file to be analyzed
 func sendRequest(s string) {
 
-	client := &http.Client{}
+	// Ensure that the client can continue reading input even if error occurs during the request process
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Unable to send POST request for file:", s)
+		}
+	}()
 
+	//--------------------------------------------------
+	// Prepare the file to be sent through POST request
+	//--------------------------------------------------
+	client := &http.Client{}
 	body := &bytes.Buffer{}
+
 	writer := multipart.NewWriter(body)
 
 	fw, err := writer.CreateFormFile("file", s)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	file, err := os.Open(s)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	_, err = io.Copy(fw, file)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	writer.Close()
 
+	//----------------------------------------------------
+	// Create, setup and send POST request with file info
+	//----------------------------------------------------
 	req, err := http.NewRequest("POST", "http://127.0.0.1:8080/", body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
+	//-----------------------------------------------------
+	// Receive and parse the data received from the server
+	//-----------------------------------------------------
 	content, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
-	//fmt.Print(content)
-
 	parseJson(content)
-
-	//fmt.Print(content)
 }
 
-//-----------------
-// Print Functions
-//-----------------
-
+// Takes in content returned by the server and prints it out
 func parseJson(c []byte) {
-
-	//fileData := make(map[string]map[string]int)
 
 	fileData := new(CharsFound)
 
 	json.Unmarshal(c, &fileData)
 
+	fmt.Println("\n------------------------------------------------------")
 	fmt.Println("Here is the data about the file:", fileData.Filename)
 
 	printLettersFound(fileData)
@@ -127,13 +145,14 @@ func parseJson(c []byte) {
 	printNumbersNotFound(fileData)
 
 	fmt.Println("------------------------------------------------------")
-	fmt.Println()
-
 }
 
+//-----------------
+// Print Functions
+//-----------------
+
 func printLettersFound(fd *CharsFound) {
-	fmt.Println()
-	fmt.Println("These are the letters found in the text: ")
+	fmt.Println("\nThese are the letters found in the text: ")
 
 	for l := 'a'; l <= 'z'; l++ {
 		if _, ok := fd.Letters[string(l)]; ok {
@@ -145,8 +164,7 @@ func printLettersFound(fd *CharsFound) {
 
 func printLettersNotFound(fd *CharsFound) {
 	if len(fd.LettersNotFound) != 0 {
-		fmt.Println()
-		fmt.Println("These are the letters not found in the text: ")
+		fmt.Println("\nThese are the letters not found in the text: ")
 		for l := 'a'; l <= 'z'; l++ {
 			if _, ok := fd.LettersNotFound[string(l)]; ok {
 				fmt.Printf("%c: %d | ", l, *fd.LettersNotFound[string(l)])
@@ -157,8 +175,7 @@ func printLettersNotFound(fd *CharsFound) {
 }
 
 func printNumbersFound(fd *CharsFound) {
-	fmt.Println()
-	fmt.Println("These are the numbers found in the text:")
+	fmt.Println("\nThese are the numbers found in the text:")
 
 	for n := 0; n < 10; n++ {
 		if _, ok := fd.Numbers[strconv.Itoa(n)]; ok {
@@ -170,8 +187,7 @@ func printNumbersFound(fd *CharsFound) {
 
 func printNumbersNotFound(fd *CharsFound) {
 	if len(fd.NumbersNotFound) != 0 {
-		fmt.Println()
-		fmt.Println("These are the numbers not found in the text: ")
+		fmt.Println("\nThese are the numbers not found in the text: ")
 		for n := 0; n < 10; n++ {
 			if _, ok := fd.NumbersNotFound[strconv.Itoa(n)]; ok {
 				fmt.Printf("%d: %d | ", n, *fd.NumbersNotFound[strconv.Itoa(n)])
