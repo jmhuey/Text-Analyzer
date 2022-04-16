@@ -17,7 +17,12 @@ import (
 )
 
 // Holds information returned by the server
-type CharsFound struct {
+
+type TextAnalysis struct {
+	CharInfo CharInfo
+}
+
+type CharInfo struct {
 	Filename        string
 	Letters         map[string]*int
 	Numbers         map[string]*int
@@ -132,17 +137,17 @@ func sendRequest(s string) {
 // Takes in content returned by the server and prints it out
 func parseJson(c []byte) {
 
-	fileData := new(CharsFound)
+	fileData := new(TextAnalysis)
 
 	json.Unmarshal(c, &fileData)
 
 	fmt.Println("\n------------------------------------------------------")
-	fmt.Println("Here is the data about the file:", fileData.Filename)
+	fmt.Println("Here is the data about the file:", fileData.CharInfo.Filename)
 
-	fileData.printLettersFound()
-	fileData.printLettersNotFound()
-	fileData.printNumbersFound()
-	fileData.printNumbersNotFound()
+	fileData.CharInfo.printLettersFound()
+	fileData.CharInfo.printLettersNotFound()
+	fileData.CharInfo.printNumbersFound()
+	fileData.CharInfo.printNumbersNotFound()
 
 	fmt.Println("------------------------------------------------------")
 }
@@ -151,7 +156,7 @@ func parseJson(c []byte) {
 // Print Functions
 //-----------------
 
-func (fd *CharsFound) printLettersFound() {
+func (fd *CharInfo) printLettersFound() {
 	fmt.Println("\nThese are the letters found in the text: ")
 
 	for l := 'a'; l <= 'z'; l++ {
@@ -162,7 +167,7 @@ func (fd *CharsFound) printLettersFound() {
 	fmt.Println()
 }
 
-func (fd *CharsFound) printLettersNotFound() {
+func (fd *CharInfo) printLettersNotFound() {
 	if len(fd.LettersNotFound) != 0 {
 		fmt.Println("\nThese are the letters not found in the text: ")
 		for l := 'a'; l <= 'z'; l++ {
@@ -174,7 +179,7 @@ func (fd *CharsFound) printLettersNotFound() {
 	}
 }
 
-func (fd *CharsFound) printNumbersFound() {
+func (fd *CharInfo) printNumbersFound() {
 	fmt.Println("\nThese are the numbers found in the text:")
 
 	for n := 0; n < 10; n++ {
@@ -185,7 +190,7 @@ func (fd *CharsFound) printNumbersFound() {
 	fmt.Println()
 }
 
-func (fd *CharsFound) printNumbersNotFound() {
+func (fd *CharInfo) printNumbersNotFound() {
 	if len(fd.NumbersNotFound) != 0 {
 		fmt.Println("\nThese are the numbers not found in the text: ")
 		for n := 0; n < 10; n++ {

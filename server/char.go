@@ -9,7 +9,7 @@ import (
 )
 
 // Holds the all the info found on the text related to characters
-type CharsFound struct {
+type CharInfo struct {
 	Filename        string
 	Letters         map[string]*int
 	Numbers         map[string]*int
@@ -18,18 +18,18 @@ type CharsFound struct {
 }
 
 // scans the file and puts unique values into a map while recording the number of times a repeated value appears
-func scanFileChar(f *os.File, s string) *CharsFound {
+func scanFileChars(f *os.File, s string) *CharInfo {
 
 	//-------------------------------------
 	// Set up the struct to hold file data
 	//------------------------------------
-	charsFound := new(CharsFound)
-	charsFound.Filename = s
+	charInfo := new(CharInfo)
+	charInfo.Filename = s
 
-	charsFound.Letters = make(map[string]*int)
-	charsFound.Numbers = make(map[string]*int)
-	charsFound.LettersNotFound = make(map[string]*int)
-	charsFound.NumbersNotFound = make(map[string]*int)
+	charInfo.Letters = make(map[string]*int)
+	charInfo.Numbers = make(map[string]*int)
+	charInfo.LettersNotFound = make(map[string]*int)
+	charInfo.NumbersNotFound = make(map[string]*int)
 
 	//------------------------------------------
 	// Process text and save values into struct
@@ -42,19 +42,19 @@ func scanFileChar(f *os.File, s string) *CharsFound {
 
 		if isLetter(token) {
 			token = strings.ToLower(token)
-			if val, ok := charsFound.Letters[token]; ok {
+			if val, ok := charInfo.Letters[token]; ok {
 				*val++
 			} else {
 				t := 1
-				charsFound.Letters[token] = &t
+				charInfo.Letters[token] = &t
 			}
 		} else if isNumber(token) {
-			if val, ok := charsFound.Numbers[token]; ok {
+			if val, ok := charInfo.Numbers[token]; ok {
 				*val++
 
 			} else {
 				t := 1
-				charsFound.Numbers[token] = &t
+				charInfo.Numbers[token] = &t
 			}
 		} else {
 			continue
@@ -62,10 +62,10 @@ func scanFileChar(f *os.File, s string) *CharsFound {
 
 	}
 
-	charsFound.checkMissingAlphanumeric()
+	charInfo.checkMissingAlphanumeric()
 
 	// Return the struct containing info found
-	return charsFound
+	return charInfo
 }
 
 // checks if string passed is a letter
@@ -87,7 +87,7 @@ func isNumber(s string) bool {
 }
 
 // checks if there are any missing alphanumeric characters
-func (cf *CharsFound) checkMissingAlphanumeric() {
+func (cf *CharInfo) checkMissingAlphanumeric() {
 	for l := 'a'; l < 'z'; l++ {
 		if _, ok := cf.Letters[string(l)]; !ok {
 			t := 0

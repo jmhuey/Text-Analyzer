@@ -9,6 +9,10 @@ import (
 	"os"
 )
 
+type TextAnalysis struct {
+	CharInfo CharInfo
+}
+
 func main() {
 	fmt.Println("Listening to port 8080")
 	http.HandleFunc("/", parseFile)
@@ -42,7 +46,7 @@ func parseFile(w http.ResponseWriter, r *http.Request) {
 	//---------------------
 	// Text analysis calls
 	//---------------------
-	data := scanFileChar(file, handler.Filename)
+	data := scanFileChars(file, handler.Filename)
 
 	word := scanFileWord(file)
 
@@ -53,7 +57,10 @@ func parseFile(w http.ResponseWriter, r *http.Request) {
 	//-----------------------------------------
 	// Create and send response back to client
 	//-----------------------------------------
-	resp, err := json.Marshal(data)
+	textAnalysis := new(TextAnalysis)
+	textAnalysis.CharInfo = *data
+
+	resp, err := json.Marshal(textAnalysis)
 	if err != nil {
 		fmt.Print("Unable to marshal information provided")
 	}
