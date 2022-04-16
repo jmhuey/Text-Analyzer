@@ -62,8 +62,7 @@ func scanFileChar(f *os.File, s string) *CharsFound {
 
 	}
 
-	checkMissingLetters(charsFound)
-	checkMissingNumbers(charsFound)
+	charsFound.checkMissingAlphanumeric()
 
 	// Return the struct containing info found
 	return charsFound
@@ -87,18 +86,15 @@ func isNumber(s string) bool {
 	return false
 }
 
-// checks if the text had any letters not used
-func checkMissingLetters(cf *CharsFound) {
+// checks if there are any missing alphanumeric characters
+func (cf *CharsFound) checkMissingAlphanumeric() {
 	for l := 'a'; l < 'z'; l++ {
 		if _, ok := cf.Letters[string(l)]; !ok {
 			t := 0
 			cf.LettersNotFound[string(l)] = &t
 		}
 	}
-}
 
-// checks if the text had any numbers not used
-func checkMissingNumbers(cf *CharsFound) {
 	for n := 0; n < 10; n++ {
 		if _, ok := cf.Numbers[strconv.Itoa(n)]; !ok {
 			t := 0

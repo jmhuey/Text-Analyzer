@@ -139,10 +139,10 @@ func parseJson(c []byte) {
 	fmt.Println("\n------------------------------------------------------")
 	fmt.Println("Here is the data about the file:", fileData.Filename)
 
-	printLettersFound(fileData)
-	printLettersNotFound(fileData)
-	printNumbersFound(fileData)
-	printNumbersNotFound(fileData)
+	fileData.printLettersFound()
+	fileData.printLettersNotFound()
+	fileData.printNumbersFound()
+	fileData.printNumbersNotFound()
 
 	fmt.Println("------------------------------------------------------")
 }
@@ -151,7 +151,7 @@ func parseJson(c []byte) {
 // Print Functions
 //-----------------
 
-func printLettersFound(fd *CharsFound) {
+func (fd *CharsFound) printLettersFound() {
 	fmt.Println("\nThese are the letters found in the text: ")
 
 	for l := 'a'; l <= 'z'; l++ {
@@ -162,7 +162,7 @@ func printLettersFound(fd *CharsFound) {
 	fmt.Println()
 }
 
-func printLettersNotFound(fd *CharsFound) {
+func (fd *CharsFound) printLettersNotFound() {
 	if len(fd.LettersNotFound) != 0 {
 		fmt.Println("\nThese are the letters not found in the text: ")
 		for l := 'a'; l <= 'z'; l++ {
@@ -174,7 +174,7 @@ func printLettersNotFound(fd *CharsFound) {
 	}
 }
 
-func printNumbersFound(fd *CharsFound) {
+func (fd *CharsFound) printNumbersFound() {
 	fmt.Println("\nThese are the numbers found in the text:")
 
 	for n := 0; n < 10; n++ {
@@ -185,7 +185,7 @@ func printNumbersFound(fd *CharsFound) {
 	fmt.Println()
 }
 
-func printNumbersNotFound(fd *CharsFound) {
+func (fd *CharsFound) printNumbersNotFound() {
 	if len(fd.NumbersNotFound) != 0 {
 		fmt.Println("\nThese are the numbers not found in the text: ")
 		for n := 0; n < 10; n++ {
