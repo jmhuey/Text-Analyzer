@@ -17,8 +17,20 @@ import (
 )
 
 // Holds information returned by the server
-type CharsFound struct {
-	Filename        string
+
+type TextAnalysis struct {
+	Filename string
+	CharInfo CharInfo
+	WordInfo WordInfo
+}
+
+type WordInfo struct {
+	TotalWords int
+	Words      map[string]*int
+}
+
+type CharInfo struct {
+	TotalChar       int
 	Letters         map[string]*int
 	Numbers         map[string]*int
 	LettersNotFound map[string]*int
@@ -132,27 +144,32 @@ func sendRequest(s string) {
 // Takes in content returned by the server and prints it out
 func parseJson(c []byte) {
 
-	fileData := new(CharsFound)
+	fileData := new(TextAnalysis)
 
 	json.Unmarshal(c, &fileData)
 
 	fmt.Println("\n------------------------------------------------------")
 	fmt.Println("Here is the data about the file:", fileData.Filename)
 
-	printLettersFound(fileData)
-	printLettersNotFound(fileData)
-	printNumbersFound(fileData)
-	printNumbersNotFound(fileData)
+	fmt.Printf("\nThere are %d total alphanumeric characters used in the text: ", fileData.CharInfo.TotalChar)
 
-	fmt.Println("------------------------------------------------------")
+	fileData.CharInfo.printLettersFound()
+	fileData.CharInfo.printLettersNotFound()
+	fileData.CharInfo.printNumbersFound()
+	fileData.CharInfo.printNumbersNotFound()
+
+	fmt.Printf("\nThere are %d unique words used in the text", len(fileData.WordInfo.Words))
+	fmt.Printf("\nThere are %d total words used in the text", fileData.WordInfo.TotalWords)
+
+	fmt.Println("\n------------------------------------------------------")
 }
 
 //-----------------
 // Print Functions
 //-----------------
 
-func printLettersFound(fd *CharsFound) {
-	fmt.Println("\nThese are the letters found in the text: ")
+func (fd *CharInfo) printLettersFound() {
+	fmt.Printf("\nThere are %d unique letters used in the text: \n", len(fd.Letters))
 
 	for l := 'a'; l <= 'z'; l++ {
 		if _, ok := fd.Letters[string(l)]; ok {
@@ -162,9 +179,9 @@ func printLettersFound(fd *CharsFound) {
 	fmt.Println()
 }
 
-func printLettersNotFound(fd *CharsFound) {
+func (fd *CharInfo) printLettersNotFound() {
 	if len(fd.LettersNotFound) != 0 {
-		fmt.Println("\nThese are the letters not found in the text: ")
+		fmt.Printf("\nThere are %d unique letters not used in the text: \n", len(fd.LettersNotFound))
 		for l := 'a'; l <= 'z'; l++ {
 			if _, ok := fd.LettersNotFound[string(l)]; ok {
 				fmt.Printf("%c: %d | ", l, *fd.LettersNotFound[string(l)])
@@ -174,8 +191,8 @@ func printLettersNotFound(fd *CharsFound) {
 	}
 }
 
-func printNumbersFound(fd *CharsFound) {
-	fmt.Println("\nThese are the numbers found in the text:")
+func (fd *CharInfo) printNumbersFound() {
+	fmt.Printf("\nThere are %d unique numbers used in the text: \n", len(fd.Numbers))
 
 	for n := 0; n < 10; n++ {
 		if _, ok := fd.Numbers[strconv.Itoa(n)]; ok {
@@ -185,9 +202,9 @@ func printNumbersFound(fd *CharsFound) {
 	fmt.Println()
 }
 
-func printNumbersNotFound(fd *CharsFound) {
+func (fd *CharInfo) printNumbersNotFound() {
 	if len(fd.NumbersNotFound) != 0 {
-		fmt.Println("\nThese are the numbers not found in the text: ")
+		fmt.Printf("\nThere are %d unique numbers not used in the text: \n", len(fd.NumbersNotFound))
 		for n := 0; n < 10; n++ {
 			if _, ok := fd.NumbersNotFound[strconv.Itoa(n)]; ok {
 				fmt.Printf("%d: %d | ", n, *fd.NumbersNotFound[strconv.Itoa(n)])
