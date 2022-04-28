@@ -79,19 +79,13 @@ func scanFileChars(s string) *CharInfo {
 // checks if string passed is a letter
 func isLetter(s string) bool {
 	is_letter := regexp.MustCompile(`^[a-zA-Z]*$`).MatchString(s)
-	if is_letter {
-		return true
-	}
-	return false
+	return is_letter
 }
 
 // checks if string passed is a number
 func isNumber(s string) bool {
 	is_number := regexp.MustCompile(`^[0-9]*$`).MatchString(s)
-	if is_number {
-		return true
-	}
-	return false
+	return is_number
 }
 
 // checks if there are any missing alphanumeric characters
