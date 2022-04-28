@@ -36,6 +36,9 @@ func parseFile(w http.ResponseWriter, r *http.Request) {
 	defer f.Close()
 
 	file, err := os.Create(handler.Filename)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	io.Copy(file, f)
 
