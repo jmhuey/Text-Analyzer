@@ -14,6 +14,7 @@ type CharInfo struct {
 	TotalChar       int
 	Letters         map[string]*int
 	Numbers         map[string]*int
+	NonAlphaNumeric map[string]*int
 	LettersNotFound map[string]*int
 	NumbersNotFound map[string]*int
 }
@@ -28,6 +29,7 @@ func scanFileChars(s string) *CharInfo {
 
 	charInfo.Letters = make(map[string]*int)
 	charInfo.Numbers = make(map[string]*int)
+	charInfo.NonAlphaNumeric = make(map[string]*int)
 	charInfo.LettersNotFound = make(map[string]*int)
 	charInfo.NumbersNotFound = make(map[string]*int)
 
@@ -65,7 +67,19 @@ func scanFileChars(s string) *CharInfo {
 			}
 			charInfo.TotalChar++
 		} else {
-			continue
+			switch token {
+			case "!", "?", ".":
+				if val, ok := charInfo.NonAlphaNumeric[token]; ok {
+					*val++
+				} else {
+					t := 1
+					charInfo.NonAlphaNumeric[token] = &t
+				}
+				charInfo.TotalChar++
+			default:
+				continue
+
+			}
 		}
 
 	}
@@ -78,14 +92,14 @@ func scanFileChars(s string) *CharInfo {
 
 // checks if string passed is a letter
 func isLetter(s string) bool {
-	is_letter := regexp.MustCompile(`^[a-zA-Z]*$`).MatchString(s)
-	return is_letter
+	isLetter := regexp.MustCompile(`^[a-zA-Z]*$`).MatchString(s)
+	return isLetter
 }
 
 // checks if string passed is a number
 func isNumber(s string) bool {
-	is_number := regexp.MustCompile(`^[0-9]*$`).MatchString(s)
-	return is_number
+	isNumber := regexp.MustCompile(`^[0-9]*$`).MatchString(s)
+	return isNumber
 }
 
 // checks if there are any missing alphanumeric characters

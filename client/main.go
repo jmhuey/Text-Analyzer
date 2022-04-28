@@ -33,6 +33,7 @@ type CharInfo struct {
 	TotalChar       int
 	Letters         map[string]*int
 	Numbers         map[string]*int
+	NonAlphaNumeric map[string]*int
 	LettersNotFound map[string]*int
 	NumbersNotFound map[string]*int
 }
@@ -157,7 +158,7 @@ func parseJson(c []byte) {
 	fileData.CharInfo.printLettersNotFound()
 	fileData.CharInfo.printNumbersFound()
 	fileData.CharInfo.printNumbersNotFound()
-
+	fileData.CharInfo.printNonAlphaNumericFound()
 	fmt.Printf("\nThere are %d unique words used in the text", len(fileData.WordInfo.Words))
 	fmt.Printf("\nThere are %d total words used in the text", fileData.WordInfo.TotalWords)
 
@@ -172,8 +173,8 @@ func (fd *CharInfo) printLettersFound() {
 	fmt.Printf("\nThere are %d unique letters used in the text: \n", len(fd.Letters))
 
 	for l := 'a'; l <= 'z'; l++ {
-		if _, ok := fd.Letters[string(l)]; ok {
-			fmt.Printf("%c: %d | ", l, *fd.Letters[string(l)])
+		if val, ok := fd.Letters[string(l)]; ok {
+			fmt.Printf("%c: %d | ", l, *val)
 		}
 	}
 	fmt.Println()
@@ -183,8 +184,8 @@ func (fd *CharInfo) printLettersNotFound() {
 	if len(fd.LettersNotFound) != 0 {
 		fmt.Printf("\nThere are %d unique letters not used in the text: \n", len(fd.LettersNotFound))
 		for l := 'a'; l <= 'z'; l++ {
-			if _, ok := fd.LettersNotFound[string(l)]; ok {
-				fmt.Printf("%c: %d | ", l, *fd.LettersNotFound[string(l)])
+			if val, ok := fd.LettersNotFound[string(l)]; ok {
+				fmt.Printf("%c: %d | ", l, *val)
 			}
 		}
 		fmt.Println()
@@ -195,8 +196,8 @@ func (fd *CharInfo) printNumbersFound() {
 	fmt.Printf("\nThere are %d unique numbers used in the text: \n", len(fd.Numbers))
 
 	for n := 0; n < 10; n++ {
-		if _, ok := fd.Numbers[strconv.Itoa(n)]; ok {
-			fmt.Printf("%d: %d | ", n, *fd.Numbers[strconv.Itoa(n)])
+		if val, ok := fd.Numbers[strconv.Itoa(n)]; ok {
+			fmt.Printf("%d: %d | ", n, *val)
 		}
 	}
 	fmt.Println()
@@ -206,11 +207,21 @@ func (fd *CharInfo) printNumbersNotFound() {
 	if len(fd.NumbersNotFound) != 0 {
 		fmt.Printf("\nThere are %d unique numbers not used in the text: \n", len(fd.NumbersNotFound))
 		for n := 0; n < 10; n++ {
-			if _, ok := fd.NumbersNotFound[strconv.Itoa(n)]; ok {
-				fmt.Printf("%d: %d | ", n, *fd.NumbersNotFound[strconv.Itoa(n)])
+			if val, ok := fd.NumbersNotFound[strconv.Itoa(n)]; ok {
+				fmt.Printf("%d: %d | ", n, *val)
 			}
 		}
 		fmt.Println()
 	}
 
+}
+
+func (fd *CharInfo) printNonAlphaNumericFound() {
+	fmt.Printf("\nThere are %d unique non-alphanumeric characters used in the text: \n", len(fd.NonAlphaNumeric))
+
+	for key, value := range fd.NonAlphaNumeric {
+		fmt.Printf("%s: %d | ", key, *value)
+	}
+
+	fmt.Println()
 }
