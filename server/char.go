@@ -48,38 +48,33 @@ func scanFileChars(s string) *CharInfo {
 	for scanner.Scan() {
 		token := scanner.Text()
 
-		if isLetter(token) {
+		t := 1
+
+		switch {
+		case isLetter(token):
 			token = strings.ToLower(token)
 			if val, ok := charInfo.Letters[token]; ok {
 				*val++
 			} else {
-				t := 1
 				charInfo.Letters[token] = &t
 			}
 			charInfo.TotalChar++
-		} else if isNumber(token) {
+		case isNumber(token):
 			if val, ok := charInfo.Numbers[token]; ok {
 				*val++
-
 			} else {
-				t := 1
 				charInfo.Numbers[token] = &t
 			}
 			charInfo.TotalChar++
-		} else {
-			switch token {
-			case "!", "?", ".":
-				if val, ok := charInfo.NonAlphaNumeric[token]; ok {
-					*val++
-				} else {
-					t := 1
-					charInfo.NonAlphaNumeric[token] = &t
-				}
-				charInfo.TotalChar++
-			default:
-				continue
-
+		case token == "!", token == "?", token == ".":
+			if val, ok := charInfo.NonAlphaNumeric[token]; ok {
+				*val++
+			} else {
+				charInfo.NonAlphaNumeric[token] = &t
 			}
+			charInfo.TotalChar++
+		default:
+			continue
 		}
 
 	}
